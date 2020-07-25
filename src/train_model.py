@@ -6,6 +6,7 @@ from tensorflow.keras.losses import BinaryCrossentropy
 from tensorflow.keras.callbacks import ModelCheckpoint, LearningRateScheduler
 from tensorflow.keras.optimizers import Adam, SGD
 from tensorflow.keras.models import Sequential
+from tensorflow.keras.metrics import f1_score
 
 
 def get_dense_two_layer_net(preprocessing_layer):
@@ -18,5 +19,5 @@ def get_dense_two_layer_net(preprocessing_layer):
     model.compile(
         loss=tf.keras.losses.BinaryCrossentropy(from_logits=True),
         optimizer=Adam(),
-        metrics=['accuracy'])
+        metrics=['accuracy', 'f1_score'])
     return model

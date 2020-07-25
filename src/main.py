@@ -34,7 +34,7 @@ numeric_features = ['month', 'day']
 train_dataset = train_dataset.map(PackNumericFeatures(numeric_features))
 valid_dataset = valid_dataset.map(PackNumericFeatures(numeric_features))
 
-show_batch(train_dataset)
+# show_batch(train_dataset)
 
 unique_elems = get_unique(train_data)
 
@@ -57,16 +57,18 @@ print(onehot_feats)
 print(embedding_feats)
 
 model = get_dense_two_layer_net(preprocessing_layer)
-callbacks = [TensorBoard(log_dir="./logs"),
-             ModelCheckpoint(filepath='./models/two_layer',
-                             save_weights_only=True,
-                             monitor='val_acc',
-                             mode='max',
-                             save_best_only=True)]
+print(model.summary)
+
+callbacks = [TensorBoard(
+    log_dir="./logs/" + datetime.now().strftime("%Y%m%d-%H%M%S")),
+    ModelCheckpoint(
+        filepath='./models/two_layer', save_weights_only=True,
+        monitor='val_acc', mode='max', save_best_only=True)]
 history = model.fit(train_dataset, validation_data=valid_dataset,
                     steps_per_epoch=train_size//batch_size,
                     validation_steps=valid_size//batch_size,
-                    callbacks=callbacks)
+                    callbacks=callbacks,
+                    epochs=10)
 
 test_preds = model.evaluate(test_dataset)
 print(test_preds)
