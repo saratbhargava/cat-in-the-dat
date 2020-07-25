@@ -31,13 +31,22 @@ def df_to_dataset(dataframe, target_name='target', shuffle=True,
 
 
 def train_valid_split(train_data, valid_size=0.1):
-    train_data, valid_data = train_test_split(train_data, test_size=valid_size)
+    train_data, valid_data = train_test_split(
+        train_data, test_size=valid_size)
     return train_data, valid_data
 
 
-def train_valid_test_datasets(train_data, test_data, valid_size=0.1):
-    train_data, valid_data = train_valid_split(train_data, valid_size)
-    train_dataset = df_to_dataset(train_data)
-    valid_dataset = df_to_dataset(valid_data)
-    test_dataset = df_to_dataset(test_data, is_test=True)
+def train_valid_test_datasets(train_data, test_data, valid_size=0.1, batch_size=32):
+    train_data, valid_data = train_valid_split(
+        train_data, valid_size)
+    train_dataset = df_to_dataset(train_data, batch_size=batch_size)
+    valid_dataset = df_to_dataset(valid_data, batch_size=batch_size)
+    test_dataset = df_to_dataset(
+        test_data, is_test=True, batch_size=batch_size)
     return train_dataset, valid_dataset, test_dataset
+
+
+def show_batch(dataset):
+    for batch, label in dataset.take(1):
+        for key, value in batch.items():
+            print("{:20s}: {}".format(key, value.numpy()))
