@@ -4,8 +4,10 @@ import pathlib
 import numpy as np
 import pandas as pd
 
+from datetime import datetime
 from tensorflow.keras.layers import DenseFeatures
-from tensorflow.keras.callbacks import TensorBoard, ModelCheckpoint
+from tensorflow.keras.callbacks import (
+    TensorBoard, ModelCheckpoint, EarlyStopping)
 
 from load_data import load_csv, train_valid_test_datasets, show_batch
 from features import (PackNumericFeatures, categorical2onehot,
@@ -63,12 +65,13 @@ callbacks = [TensorBoard(
     log_dir="./logs/" + datetime.now().strftime("%Y%m%d-%H%M%S")),
     ModelCheckpoint(
         filepath='./models/two_layer', save_weights_only=True,
-        monitor='val_acc', mode='max', save_best_only=True)]
+        monitor='val_accuracy', mode='max', save_best_only=True),
+    EarlyStopping(monitor='val_accuracy', patience=2)]
 history = model.fit(train_dataset, validation_data=valid_dataset,
                     steps_per_epoch=train_size//batch_size,
                     validation_steps=valid_size//batch_size,
                     callbacks=callbacks,
-                    epochs=10)
+                    epochs=5)
 
-test_preds = model.evaluate(test_dataset)
+test_preds = model.predict(test_dataset)
 print(test_preds)

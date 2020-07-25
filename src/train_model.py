@@ -14,10 +14,10 @@ def get_dense_two_layer_net(preprocessing_layer):
         preprocessing_layer,
         tf.keras.layers.Dense(128, activation='relu'),
         tf.keras.layers.Dense(128, activation='relu'),
-        tf.keras.layers.Dense(1),
+        tf.keras.layers.Dense(1, activation='sigmoid'),
     ])
     model.compile(
-        loss=tf.keras.losses.BinaryCrossentropy(from_logits=True),
+        loss=tf.keras.losses.BinaryCrossentropy(from_logits=False),
         optimizer=Adam(),
-        metrics=['accuracy', 'f1_score'])
+        metrics=['accuracy', f1_score])
     return model
