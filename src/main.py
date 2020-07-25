@@ -76,5 +76,5 @@ history = model.fit(train_dataset, validation_data=valid_dataset,
 
 test_preds = model.predict(test_dataset)
 
-submission = pd.DataFrame({'id': test_data_id, 'target': test_preds})
+submission = pd.DataFrame({'id': test_data_id, 'target': test_preds.flatten()})
 submission.to_csv("submission.csv")

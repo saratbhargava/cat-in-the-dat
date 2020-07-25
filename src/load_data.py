@@ -19,14 +19,15 @@ def load_csv(train_fileName, test_fileName=None, test_size=None):
 def df_to_dataset(dataframe, target_name='target', shuffle=True,
                   is_test=False, batch_size=32):
     dataframe = dataframe.copy()
-    if not is_test:
+    if is_test:
+        ds = tf.data.Dataset.from_tensor_slices(dict(dataframe))
+        ds = ds.batch(batch_size, False)
+    else:
         labels = dataframe.pop(target_name)
         ds = tf.data.Dataset.from_tensor_slices((dict(dataframe), labels))
-    else:
-        ds = tf.data.Dataset.from_tensor_slices(dict(dataframe))
-    if shuffle:
-        ds = ds.shuffle(buffer_size=dataframe.shape[0])
-    ds = ds.batch(batch_size, True)
+        if shuffle:
+            ds = ds.shuffle(buffer_size=dataframe.shape[0])
+        ds = ds.batch(batch_size, True)
     return ds
 
 
