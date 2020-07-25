@@ -1,8 +1,22 @@
 import tensorflow as tf
+
 from tensorflow.keras.layers import Dense, Dropout, BatchNormalization
 from tensorflow.keras.activations import relu
 from tensorflow.keras.losses import BinaryCrossentropy
 from tensorflow.keras.callbacks import ModelCheckpoint, LearningRateScheduler
 from tensorflow.keras.optimizers import Adam, SGD
 from tensorflow.keras.models import Sequential
-from tensorflow.keras.metrics import f1
+
+
+def get_dense_two_layer_net(preprocessing_layer):
+    model = tf.keras.Sequential([
+        preprocessing_layer,
+        tf.keras.layers.Dense(128, activation='relu'),
+        tf.keras.layers.Dense(128, activation='relu'),
+        tf.keras.layers.Dense(1),
+    ])
+    model.compile(
+        loss=tf.keras.losses.BinaryCrossentropy(from_logits=True),
+        optimizer=Adam(),
+        metrics=['accuracy'])
+    return model
