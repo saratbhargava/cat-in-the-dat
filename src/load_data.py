@@ -36,14 +36,16 @@ def train_valid_split(train_data, valid_size=0.1):
     return train_data, valid_data
 
 
-def train_valid_test_datasets(train_data, test_data, valid_size=0.1, batch_size=32):
+def train_valid_test_datasets(train_data, test_data, valid_size=0.1,
+                              batch_size=32, test_shuffle=False):
     train_data, valid_data = train_valid_split(
         train_data, valid_size)
     if type(train_data) is pd.DataFrame:
         train_dataset = df_to_dataset(train_data, batch_size=batch_size)
         valid_dataset = df_to_dataset(valid_data, batch_size=batch_size)
         test_dataset = df_to_dataset(
-            test_data, is_test=True, batch_size=batch_size)
+            test_data, is_test=True, batch_size=batch_size,
+            shuffle=test_shuffle)
 
     return train_dataset, valid_dataset, test_dataset
 

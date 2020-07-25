@@ -23,10 +23,10 @@ batch_size = 128  # 32
 
 train_data, test_data = load_csv(train_fileName, test_fileName)
 train_data.pop("id")
-test_data.pop("id")
+test_data_id = test_data.pop("id")
 train_dataset, valid_dataset, test_dataset = train_valid_test_datasets(
     train_data, test_data, valid_size=0.2,
-    batch_size=batch_size)
+    batch_size=batch_size, test_shuffle=False)
 train_size = int(train_data.shape[0]*0.8)
 valid_size = int(train_data.shape[0]*0.2)
 print(train_data.shape, test_data.shape)
@@ -65,13 +65,16 @@ callbacks = [TensorBoard(
     log_dir="./logs/" + datetime.now().strftime("%Y%m%d-%H%M%S")),
     ModelCheckpoint(
         filepath='./models/two_layer', save_weights_only=True,
-        monitor='val_accuracy', mode='max', save_best_only=True),
-    EarlyStopping(monitor='val_accuracy', patience=2)]
+        monitor='val_accuracy', mode='max', save_best_only=True,
+        verbose=1),
+    EarlyStopping(monitor='val_accuracy', patience=2, verbose=1)]
 history = model.fit(train_dataset, validation_data=valid_dataset,
                     steps_per_epoch=train_size//batch_size,
                     validation_steps=valid_size//batch_size,
-                    callbacks=callbacks,
-                    epochs=5)
+                    callbacks=callbacks, verbose=1,
+                    epochs=1)
 
 test_preds = model.predict(test_dataset)
-print(test_preds)
+
+submission = pd.DataFrame({'id': test_data_id, 'target': test_preds})
+submission.to_csv("submission.csv")
