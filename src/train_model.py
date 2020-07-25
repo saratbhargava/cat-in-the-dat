@@ -20,3 +20,7 @@ def get_dense_two_layer_net(preprocessing_layer):
         optimizer=Adam(),
         metrics=['accuracy', 'AUC'])
     return model
+
+
+def train_dense_model(model):
+    pass
