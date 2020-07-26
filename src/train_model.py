@@ -29,23 +29,6 @@ def get_dense_two_layer_net(preprocessing_layer, decay_rate=1e-3):
     return model
 
 
-def get_dense_two_layer_net_hparam(
-        preprocessing_layer, decay_rates=[1e-3], ):
-    model = tf.keras.Sequential([
-        preprocessing_layer,
-        tf.keras.layers.Dense(128, activation='relu',
-                              kernel_regularizer=decay_rate),
-        tf.keras.layers.Dense(128, activation='relu',
-                              kernel_regularizer=decay_rate),
-        tf.keras.layers.Dense(1, activation='sigmoid'),
-    ])
-    model.compile(
-        loss=tf.keras.losses.BinaryCrossentropy(from_logits=False),
-        optimizer=Adam(),
-        metrics=['accuracy', 'AUC'])
-    return model
-
-
 def get_logistic_regression(preprocessing_layer):
     model = tf.keras.Sequential([
         preprocessing_layer,
@@ -58,24 +41,8 @@ def get_logistic_regression(preprocessing_layer):
     return model
 
 
-def get_dense_two_layer_net_hparam(
-        preprocessing_layer, decay_rates=[1e-3], ):
-    model = tf.keras.Sequential([
-        preprocessing_layer,
-        tf.keras.layers.Dense(128, activation='relu',
-                              kernel_regularizer=decay_rate),
-        tf.keras.layers.Dense(128, activation='relu',
-                              kernel_regularizer=decay_rate),
-        tf.keras.layers.Dense(1, activation='sigmoid'),
-    ])
-    model.compile(
-        loss=tf.keras.losses.BinaryCrossentropy(from_logits=False),
-        optimizer=Adam(),
-        metrics=['accuracy', 'AUC'])
-    return model
-
-
-def train_dense_two_layer_net_hparam(preprocessing_layer, hparams, logs, models_dir):
+def train_dense_two_layer_net_hparam_helper(
+        preprocessing_layer, hparams, logs, models_dir):
     model = Sequential(
         [
             preprocessing_layer,
@@ -108,8 +75,10 @@ def train_dense_two_layer_net_hparam(preprocessing_layer, hparams, logs, models_
                datetime.now().strftime("%Y%m%d-%H%M%S"))
 
 
-def train_model_hparam(preprocessing_layer, HP_NUM_UNITS, HP_DROPOUT,
-                       HP_OPTIMIZER, HP_EPOCHS, exp_name='exp1'):
+def train_dense_two_layer_net_hparam(
+        preprocessing_layer, HP_NUM_UNITS, HP_DROPOUT,
+        HP_OPTIMIZER, HP_EPOCHS, exp_name='exp1'):
+
     session_num = 0
     for num_units in HP_NUM_UNITS.domain.values:
         for dropout_rate in (HP_DROPOUT.domain.min_value, HP_DROPOUT.domain.max_value):
@@ -129,4 +98,3 @@ def train_model_hparam(preprocessing_layer, HP_NUM_UNITS, HP_DROPOUT,
                         f'logs/{exp_name}/' + session_name,
                         f'models/{exp_name}/' + session_name)
                     session_num += 1
-    return
