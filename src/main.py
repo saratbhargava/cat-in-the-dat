@@ -15,7 +15,8 @@ from features import (PackNumericFeatures, categorical2onehot,
                       categorical2embedding, normalization)
 from utils import get_unique
 from train_model import (get_dense_two_layer_net,
-                         get_logistic_regression, train_model_hparam)
+                         get_logistic_regression,
+                         train_dense_two_layer_net_hparam)
 from submit import submit
 
 # load data and create Dataset obj
@@ -112,5 +113,6 @@ HP_DROPOUT = hp.HParam('dropout', hp.RealInterval(0.1, 0.2))
 HP_OPTIMIZER = hp.HParam('lr', hp.Discrete([1e-5, 2e-5]))
 HP_EPOCHS = hp.HParam('epochs', hp.Discrete([10]))
 
-train_model_hparam(preprocessing_layer, HP_NUM_UNITS, HP_DROPOUT,
-                   HP_OPTIMIZER, HP_EPOCHS)
+train_dense_two_layer_net_hparam(
+    preprocessing_layer, HP_NUM_UNITS, HP_DROPOUT,
+    HP_OPTIMIZER, HP_EPOCHS)

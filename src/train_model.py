@@ -8,7 +8,7 @@ from tensorflow.keras.losses import BinaryCrossentropy
 from tensorflow.keras.callbacks import (
     ModelCheckpoint, LearningRateScheduler, TensorBoard,
     EarlyStopping)
-from tensorflow.keras.optimizers import Adam, SGD
+from tensorflow.keras.optimizers import Adam, SGD, RMSprop
 from tensorflow.keras.models import Sequential
 from tensorboard.plugins.hparams import api as hp
 
@@ -20,23 +20,6 @@ def get_dense_two_layer_net(preprocessing_layer, decay_rate=1e-3):
                               kernel_regularizer=l2(decay_rate)),
         tf.keras.layers.Dense(128, activation='relu',
                               kernel_regularizer=l2(decay_rate)),
-        tf.keras.layers.Dense(1, activation='sigmoid'),
-    ])
-    model.compile(
-        loss=tf.keras.losses.BinaryCrossentropy(from_logits=False),
-        optimizer=Adam(),
-        metrics=['accuracy', 'AUC'])
-    return model
-
-
-def get_dense_two_layer_net_hparam(
-        preprocessing_layer, decay_rates=[1e-3], ):
-    model = tf.keras.Sequential([
-        preprocessing_layer,
-        tf.keras.layers.Dense(128, activation='relu',
-                              kernel_regularizer=decay_rate),
-        tf.keras.layers.Dense(128, activation='relu',
-                              kernel_regularizer=decay_rate),
         tf.keras.layers.Dense(1, activation='sigmoid'),
     ])
     model.compile(
@@ -58,39 +41,27 @@ def get_logistic_regression(preprocessing_layer):
     return model
 
 
-def get_dense_two_layer_net_hparam(
-        preprocessing_layer, decay_rates=[1e-3], ):
-    model = tf.keras.Sequential([
-        preprocessing_layer,
-        tf.keras.layers.Dense(128, activation='relu',
-                              kernel_regularizer=decay_rate),
-        tf.keras.layers.Dense(128, activation='relu',
-                              kernel_regularizer=decay_rate),
-        tf.keras.layers.Dense(1, activation='sigmoid'),
-    ])
-    model.compile(
-        loss=tf.keras.losses.BinaryCrossentropy(from_logits=False),
-        optimizer=Adam(),
-        metrics=['accuracy', 'AUC'])
-    return model
-
-
-def train_dense_two_layer_net_hparam(preprocessing_layer, hparams, logs, models_dir):
+def train_dense_two_layer_net_hparam_helper(
+        preprocessing_layer, hparams,
+        HP_NUM_UNITS, HP_DROPOUT, HP_OPTIMIZER, HP_EPOCHS,
+        logs, models_dir):
+    print(hparams, hparams[HP_DROPOUT], hparams[HP_NUM_UNITS])
     model = Sequential(
         [
             preprocessing_layer,
-            Dense(hparams[HP_DENSE_UNITS], activation='relu'),
+            Dense(hparams[HP_NUM_UNITS], activation='relu'),
             Dropout(hparams[HP_DROPOUT]),
-            Dense(hparams[HP_DENSE_UNITS], activation='relu'),
+            Dense(hparams[HP_NUM_UNITS], activation='relu'),
             Dense(1, activation='sigmoid')
         ]
     )
     model.compile(
         optimizer=RMSprop(lr=hparams[HP_OPTIMIZER]),
-        loss=CategoricalCrossentropy(),
+        loss=BinaryCrossentropy(),
         metrics=['accuracy', 'AUC'])
     model_checkpoint = ModelCheckpoint(
-        filepath=f'{models_dir}/checkpoint_{epoch:02d}_{val_accuracy:.02f}',
+        # _{epoch:02d}_{val_accuracy:.02f}
+        filepath=f'{models_dir}/checkpoint',
         save_best_only=True, verbose=1, monitor='val_accuracy')
     log_dir = logs + datetime.now().strftime("%Y%m%d-%H%M%S")
     tensorboard_callback = tf.keras.callbacks.TensorBoard(
@@ -108,8 +79,10 @@ def train_dense_two_layer_net_hparam(preprocessing_layer, hparams, logs, models_
                datetime.now().strftime("%Y%m%d-%H%M%S"))
 
 
-def train_model_hparam(preprocessing_layer, HP_NUM_UNITS, HP_DROPOUT,
-                       HP_OPTIMIZER, HP_EPOCHS, exp_name='exp1'):
+def train_dense_two_layer_net_hparam(
+        preprocessing_layer, HP_NUM_UNITS, HP_DROPOUT,
+        HP_OPTIMIZER, HP_EPOCHS, exp_name='exp1'):
+
     session_num = 0
     for num_units in HP_NUM_UNITS.domain.values:
         for dropout_rate in (HP_DROPOUT.domain.min_value, HP_DROPOUT.domain.max_value):
@@ -124,9 +97,10 @@ def train_model_hparam(preprocessing_layer, HP_NUM_UNITS, HP_DROPOUT,
                     session_name = f'num_units_{num_units}-dropout_{dropout_rate}-lr_{optimizer}-epochs_{epochs}'
                     print(f'Session number: {session_num}')
                     print({h.name: hparams[h] for h in hparams})
-                    train_dense_two_layer_net_hparam(
+                    train_dense_two_layer_net_hparam_helper(
                         preprocessing_layer, hparams,
+                        HP_NUM_UNITS, HP_DROPOUT,
+                        HP_OPTIMIZER, HP_EPOCHS,
                         f'logs/{exp_name}/' + session_name,
                         f'models/{exp_name}/' + session_name)
                     session_num += 1
-    return
