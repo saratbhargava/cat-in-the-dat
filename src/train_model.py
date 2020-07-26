@@ -29,6 +29,23 @@ def get_dense_two_layer_net(preprocessing_layer, decay_rate=1e-3):
     return model
 
 
+def get_dense_two_layer_net_hparam(
+        preprocessing_layer, decay_rates=[1e-3], ):
+    model = tf.keras.Sequential([
+        preprocessing_layer,
+        tf.keras.layers.Dense(128, activation='relu',
+                              kernel_regularizer=decay_rate),
+        tf.keras.layers.Dense(128, activation='relu',
+                              kernel_regularizer=decay_rate),
+        tf.keras.layers.Dense(1, activation='sigmoid'),
+    ])
+    model.compile(
+        loss=tf.keras.losses.BinaryCrossentropy(from_logits=False),
+        optimizer=Adam(),
+        metrics=['accuracy', 'AUC'])
+    return model
+
+
 def get_logistic_regression(preprocessing_layer):
     model = tf.keras.Sequential([
         preprocessing_layer,
