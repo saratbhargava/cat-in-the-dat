@@ -13,7 +13,7 @@ from load_data import load_csv, train_valid_test_datasets, show_batch
 from features import (PackNumericFeatures, categorical2onehot,
                       categorical2embedding, normalization)
 from utils import get_unique
-from train_model import get_dense_two_layer_net
+from train_model import get_dense_two_layer_net, get_logistic_regression
 from submit import submit
 
 # load data and create Dataset obj
@@ -56,11 +56,38 @@ embedding_feats = categorical2embedding(
     categorical_feats_len_embeddings)
 
 preprocessing_layer = DenseFeatures(onehot_feats + embedding_feats)
-model = get_dense_two_layer_net(preprocessing_layer)
+
+steps_per_epoch = train_size//batch_size
+validation_steps = valid_size//batch_size
+
+# nnets-1
+# model = get_dense_two_layer_net(preprocessing_layer)
+# print(model.summary)
+
+# logs_name = './logs/'
+# model_checkpoint_name = './models/two_layer'
+
+# callbacks = [TensorBoard(
+#     log_dir=logs_name + datetime.now().strftime("%Y%m%d-%H%M%S")),
+#     ModelCheckpoint(
+#     filepath=model_checkpoint_name, monitor='val_accuracy',
+#     mode='max', save_best_only=True, verbose=1),
+#     EarlyStopping(monitor='val_accuracy', patience=2, verbose=1)]
+
+# history = model.fit(
+#     train_dataset, validation_data=valid_dataset,
+#     steps_per_epoch=train_size//batch_size,
+#     validation_steps=valid_size//batch_size,
+#     callbacks=callbacks, verbose=1, epochs=epochs)
+
+# submit(model, test_dataset, test_data_id)
+
+# logistic reg
+model = get_logistic_regression(preprocessing_layer)
 print(model.summary)
 
 logs_name = './logs/'
-model_checkpoint_name = './models/two_layer'
+model_checkpoint_name = './models/logistic_reg'
 
 callbacks = [TensorBoard(
     log_dir=logs_name + datetime.now().strftime("%Y%m%d-%H%M%S")),
@@ -71,8 +98,8 @@ callbacks = [TensorBoard(
 
 history = model.fit(
     train_dataset, validation_data=valid_dataset,
-    steps_per_epoch=train_size//batch_size,
-    validation_steps=valid_size//batch_size,
+    steps_per_epoch=steps_per_epoch,
+    validation_steps=validation_steps,
     callbacks=callbacks, verbose=1, epochs=epochs)
 
 submit(model, test_dataset, test_data_id)
