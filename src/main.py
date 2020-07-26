@@ -21,7 +21,7 @@ train_fileName = '../inputs/train.csv'
 test_fileName = '../inputs/test.csv'
 
 batch_size = 128  # 32
-epochs = 1
+epochs = 5
 
 train_data, test_data = load_csv(train_fileName, test_fileName)
 train_data.pop("id")
