@@ -72,7 +72,11 @@ class train_dense_two_layer_net_hparam:
                             f'models/{exp_name}/' + session_name)
                         session_num += 1
 
-    def __helper__(self, hparams, logs, models_dir):
+
+<< << << < HEAD
+
+
+def __helper__(self, hparams, logs, models_dir):
         model = Sequential(
             [
                 preprocessing_layer,
@@ -103,3 +107,34 @@ class train_dense_two_layer_net_hparam:
                 METRIC_ACCURACY, history.history['val_accuracy'][-1], step=1)
         model.save(f"{models_dir}/final_epoch_{history.history['val_accuracy'][-1]}_" +
                    datetime.now().strftime("%Y%m%d-%H%M%S"))
+
+
+== == == =
+
+
+def train_dense_two_layer_net_hparam(
+        preprocessing_layer, HP_NUM_UNITS, HP_DROPOUT,
+        HP_OPTIMIZER, HP_EPOCHS, exp_name='exp1'):
+
+    session_num = 0
+    for num_units in HP_NUM_UNITS.domain.values:
+        for dropout_rate in (HP_DROPOUT.domain.min_value, HP_DROPOUT.domain.max_value):
+            for optimizer in HP_OPTIMIZER.domain.values:
+                for epochs in HP_EPOCHS.domain.values:
+                    hparams = {
+                        HP_NUM_UNITS: num_units,
+                        HP_DROPOUT: dropout_rate,
+                        HP_OPTIMIZER: optimizer,
+                        HP_EPOCHS: epochs
+                    }
+                    session_name = f'num_units_{num_units}-dropout_{dropout_rate}-lr_{optimizer}-epochs_{epochs}'
+                    print(f'Session number: {session_num}')
+                    print({h.name: hparams[h] for h in hparams})
+                    train_dense_two_layer_net_hparam(
+                        preprocessing_layer, hparams,
+                        f'logs/{exp_name}/' + session_name,
+                        f'models/{exp_name}/' + session_name)
+                    session_num += 1
+
+
+>>>>>> > 61f445ad773dbcc344241035418c049aaf62797b
