@@ -44,13 +44,17 @@ def get_logistic_regression(preprocessing_layer):
 class train_dense_two_layer_net_hparam:
     # A bad way to use classes, can use funcs
 
-    def __init__(self, preprocessing_layer, HP_NUM_UNITS, HP_DROPOUT,
-                 HP_OPTIMIZER, HP_EPOCHS, exp_name='exp1'):
+    def __init__(self, train_data, valid_data, preprocessing_layer,
+                 HP_NUM_UNITS, HP_DROPOUT, HP_OPTIMIZER, HP_EPOCHS,
+                 exp_name='exp1'):
 
         self.HP_NUM_UNITS = HP_NUM_UNITS
         self.HP_DROPOUT = HP_DROPOUT
         self.HP_OPTIMIZER = HP_OPTIMIZER
         self.HP_EPOCHS = HP_EPOCHS
+        self.preprocessing_layer = preprocessing_layer
+        self.train_data = train_data
+        self.valid_data = valid_data
 
         session_num = 0
         for num_units in HP_NUM_UNITS.domain.values:
@@ -72,14 +76,10 @@ class train_dense_two_layer_net_hparam:
                             f'models/{exp_name}/' + session_name)
                         session_num += 1
 
-
-<< << << < HEAD
-
-
-def __helper__(self, hparams, logs, models_dir):
+    def __helper__(self, hparams, logs, models_dir):
         model = Sequential(
             [
-                preprocessing_layer,
+                self.preprocessing_layer,
                 Dense(hparams[self.HP_NUM_UNITS], activation='relu'),
                 Dropout(hparams[self.HP_DROPOUT]),
                 Dense(hparams[self.HP_NUM_UNITS], activation='relu'),
@@ -99,7 +99,7 @@ def __helper__(self, hparams, logs, models_dir):
         hp_callback = hp.KerasCallback(logs, hparams)
         callbacks = [model_checkpoint, tensorboard_callback,
                      hp_callback]
-        history = model.fit(train_data, validation_data=valid_data,
+        history = model.fit(self.train_data, validation_data=self.valid_data,
                             epochs=hparams[self.HP_EPOCHS], callbacks=callbacks)
         with tf.summary.create_file_writer(logs).as_default():
             hp.hparams(hparams)
@@ -107,34 +107,3 @@ def __helper__(self, hparams, logs, models_dir):
                 METRIC_ACCURACY, history.history['val_accuracy'][-1], step=1)
         model.save(f"{models_dir}/final_epoch_{history.history['val_accuracy'][-1]}_" +
                    datetime.now().strftime("%Y%m%d-%H%M%S"))
-
-
-== == == =
-
-
-def train_dense_two_layer_net_hparam(
-        preprocessing_layer, HP_NUM_UNITS, HP_DROPOUT,
-        HP_OPTIMIZER, HP_EPOCHS, exp_name='exp1'):
-
-    session_num = 0
-    for num_units in HP_NUM_UNITS.domain.values:
-        for dropout_rate in (HP_DROPOUT.domain.min_value, HP_DROPOUT.domain.max_value):
-            for optimizer in HP_OPTIMIZER.domain.values:
-                for epochs in HP_EPOCHS.domain.values:
-                    hparams = {
-                        HP_NUM_UNITS: num_units,
-                        HP_DROPOUT: dropout_rate,
-                        HP_OPTIMIZER: optimizer,
-                        HP_EPOCHS: epochs
-                    }
-                    session_name = f'num_units_{num_units}-dropout_{dropout_rate}-lr_{optimizer}-epochs_{epochs}'
-                    print(f'Session number: {session_num}')
-                    print({h.name: hparams[h] for h in hparams})
-                    train_dense_two_layer_net_hparam(
-                        preprocessing_layer, hparams,
-                        f'logs/{exp_name}/' + session_name,
-                        f'models/{exp_name}/' + session_name)
-                    session_num += 1
-
-
->>>>>> > 61f445ad773dbcc344241035418c049aaf62797b

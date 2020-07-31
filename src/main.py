@@ -114,5 +114,6 @@ HP_OPTIMIZER = hp.HParam('lr', hp.Discrete([1e-5, 2e-5]))
 HP_EPOCHS = hp.HParam('epochs', hp.Discrete([10]))
 
 train_dense_two_layer_net_hparam(
+    train_dataset, valid_dataset,
     preprocessing_layer, HP_NUM_UNITS, HP_DROPOUT,
     HP_OPTIMIZER, HP_EPOCHS)
